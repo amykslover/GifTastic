@@ -1,30 +1,32 @@
+//Create set of original buttons that match the theme
+//Allow new buttons to be dynamically created when the user inputs text into a box
+//Pass the input box variable into the API call
 
 var baseURL = 'https://api.giphy.com/v1/gifs/search?'
 var animals = ['sloth', 'cat', 'kitten', 'hedgehog', 'puppy']
-var searchQuantity = ('&limit=5')
+//You can change the quantity here if more or less results are desired
+var quantity = 10
+var searchQuantity = ('&limit='+quantity)
 var apiKey = '&api_key=8ar1hXDZE0ZQfYYwZmnouFFY3la70VLz'
 
 
-//Create a function that wipes out any buttons that already exist and then creates buttons for all variables in the array
+//Create a function that wipes out any buttons that already exist
+//then creates buttons for all variables in the array
 function renderButtons() {
-
 	$(".button-area").empty();
-
 	// Looping through the array of animals
 	for (var i = 0; i < animals.length; i++) {
-
-		// Dynamicaly generating buttons for each movie in the array.
+		//Dynamicaly generating buttons for each anima; in the array.
 		var newButton = $("<button>");
 		newButton.addClass("button");
 		newButton.attr("data-name",animals[i])
 		newButton.text(animals[i]);
 		// Adding the button to the HTML
 		$(".button-area").append(newButton);
-		console.log(newButton);
 	}
-
 }
 
+//Allow user to create new animal button by typing into input box. 
 
 $("#add-animal").on("click", function(event) {
 	event.preventDefault();
@@ -33,95 +35,90 @@ $("#add-animal").on("click", function(event) {
 	renderButtons();
 	});
 
+//User will push one of the buttons and cause giph image and rating to be displayed based on the data name attribute
 
 function displayAnimals() {
+	$('.display-area').empty();
+
 	var searchAnimal = $(this).attr("data-name");
 	var searchTerm = ('q='+searchAnimal)
 	var queryURL = baseURL + searchTerm + searchQuantity + apiKey;
 	console.log(queryURL);
 
+
 	$.ajax({
 		url: queryURL,
 		method: 'GET'
 		}).done(function(response) {
-	
-			console.log(response);
-			console.log(response.data[0].images.fixed_height.url);
-			console.log(response.data[0].rating);
-			var animalDiv = $('<div>');
-			animalDiv.addClass('aDiv');
 
-	        var imgURL = response.data[0].images.fixed_height.url;
+			var results = response.data;
+			console.log(results);
 
-          	var image = $("<img>").attr("src", imgURL);
+			for (var i = 0; i < results.length; i++) {
 
-			response.data[0].images.fixed_height.url;
-			
-			var rating = response.data[0].rating;
-			var pOne = $("<p>").text("Rating: " + rating);
-			response.data[0].rating;
-			
-			animalDiv.append(image);
-			animalDiv.append(rating);
+				var animalDiv = $('<div>');
+				animalDiv.addClass('aDiv');
 
-			$('.display-area').prepend(animalDiv);
+				var imageDiv = $('<div>');
+		        var imgURLr = response.data[i].images.fixed_height_still.url;
+		        var imgURLa = response.data[i].images.fixed_height.url;
+		        var imgURLs = response.data[i].images.fixed_height_still.url;
+
+		      	var image = $('<img>')
+				image.addClass('gif')
+		      	image.attr('src', imgURLr);
+				image.attr('data-animate',imgURLa)
+				image.attr('data-still',imgURLs)
+				image.attr('data-state','still')
+				imageDiv.append(image);
+				//Verify that image object is built as expected
+				console.log(image);
+				//Checking to make sure that values are returned as expected
+				console.log('regular ' + imgURLr);
+				console.log('still ' + imgURLs);
+				console.log('active '+ imgURLa);
+
+				var rating = response.data[i].rating;
+				console.log(rating)
+				var ratingDisplay = $('<div>').text('Rating: ' + rating);
+				
+				animalDiv.append(imageDiv);
+				animalDiv.append(ratingDisplay);
+
+				$('.display-area').prepend(animalDiv);
+			}
+
 		});
 
 
 	};
 
 
-        //   // Creating a div to hold the movie
-        //   var movieDiv = $("<div class='movie'>");
+ 	//Users can click on a gif and they will move or be still
+ 	//We are going to use the attributes set in the display function to allow a user to click on the function to change the data state, targeting the class 
+ 	//The 'src' tag will have a default 'still' value assigned from when we first set the attribute above
+ 	//The data-still tag will have the same as the source
+ 	//The data-animagte attribute will store the animated gif so when the user clicks on a button where the state was previously set to still, the state will change to animate and the animated gif url will be referenced.
+   $(".gif").on("click", function() {
+      // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
+      console.log(this);
+      var state = $(this).data("data-state");
+      console.log(state);
+      // If the clicked image's state is still, update its src attribute to what its data-animate value is.
+      // Then, set the image's data-state to animate
+      // Else set src to the data-still value
+      if (state === "still") {
+        $(this).attr("src", $(this).attr("data-animate"));
+        $(this).attr("data-state", "animate");
+      } else {
+        $(this).attr("src", $(this).attr("data-still"));
+        $(this).attr("data-state", "still");
+      }
 
-        //   // Storing the rating data
-        //   var rating = response.Rated;
-
-        //   // Creating an element to have the rating displayed
-        //   var pOne = $("<p>").text("Rating: " + rating);
-
-        //   // Displaying the rating
-        //   movieDiv.append(pOne);
-
-        //   // Storing the release year
-        //   var released = response.Released;
-
-        //   // Creating an element to hold the release year
-        //   var pTwo = $("<p>").text("Released: " + released);
-
-        //   // Displaying the release year
-        //   movieDiv.append(pTwo);
-
-        //   // Storing the plot
-        //   var plot = response.Plot;
-
-        //   // Creating an element to hold the plot
-        //   var pThree = $("<p>").text("Plot: " + plot);
-
-        //   // Appending the plot
-        //   movieDiv.append(pThree);
-
-        //   // Retrieving the URL for the image
-        //   var imgURL = response.Poster;
-
-        //   // Creating an element to hold the image
-        //   var image = $("<img>").attr("src", imgURL);
-
-        //   // Appending the image
-        //   movieDiv.append(image);
-
-        //   // Putting the entire movie above the previous movies
-        //   $("#movies-view").prepend(movieDiv);
-        // });
-
-      // }
-
+    });
 
 $(document).on("click", ".button", displayAnimals);
 
 renderButtons();
 
 				
-//Create set of original buttons that match the theme
-//Allow new buttons to be dynamically created when the user inputs text into a box
-//Pass the input box variable into the API call
