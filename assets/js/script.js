@@ -32,6 +32,7 @@ $("#add-animal").on("click", function(event) {
 	event.preventDefault();
 	var animal = $("#animal-input").val().trim();
 	animals.push(animal);
+	$("#animal-input").val('');
 	renderButtons();
 	});
 
@@ -99,7 +100,7 @@ function displayAnimals() {
  	//The 'src' tag will have a default 'still' value assigned from when we first set the attribute above
  	//The data-still tag will have the same as the source
  	//The data-animagte attribute will store the animated gif so when the user clicks on a button where the state was previously set to still, the state will change to animate and the animated gif url will be referenced.
-   $(".gif").on("click", function() {
+   $(".gif").on("click", function(event) {
       // The attr jQuery method allows us to get or set the value of any attribute on our HTML element
       console.log(this);
       var state = $(this).data("data-state");
